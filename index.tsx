@@ -2,8 +2,12 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
 */
-import React, { useState, FC } from 'react';
+import React, { useState, FC, useEffect, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
+import { GoogleGenAI } from "@google/genai";
+
+// --- GEMINI API SETUP ---
+const ai = new GoogleGenAI({apiKey: process.env.API_KEY});
 
 // --- DATA STRUCTURES ---
 interface Lesson {
@@ -18,6 +22,31 @@ interface Sprint {
   description: string;
   lessons: Lesson[];
 }
+
+// --- SVG ICON COMPONENTS ---
+const CheckmarkIcon: FC = () => (
+    <svg className="completed-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="20 6 9 17 4 12"></polyline>
+    </svg>
+);
+
+const RobotIcon: FC = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="icon">
+        <path d="M12 2a2 2 0 0 0-2 2v2H8a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-2V4a2 2 0 0 0-2-2zM8 10h8v8H8v-8zm2 2v4h4v-4h-4z" />
+        <circle cx="9.5" cy="14.5" r="1.5" />
+        <circle cx="14.5" cy="14.5" r="1.5" />
+    </svg>
+);
+
+
+// --- UI COMPONENTS ---
+const KeyConcept: FC<{title: string; children: React.ReactNode}> = ({ title, children }) => (
+    <div className="key-concept">
+        <h4>{title}</h4>
+        <p>{children}</p>
+    </div>
+);
+
 
 // --- LESSON COMPONENTS ---
 
@@ -40,8 +69,11 @@ const ComputerFoundationsLesson: FC = () => (
       <li>Identify computer input and output devices.</li>
       <li>Use the mouse to navigate through the computer.</li>
     </ul>
-    <h3>What is a Computer?</h3>
-    <p>A computer is any electronic device that can be programmed to carry out a set of logical instructions. We use them for gaming, watching videos, communication, and more!</p>
+
+    <KeyConcept title="What is a Computer?">
+        A computer is any electronic device that can be programmed to carry out a set of logical instructions. We use them for gaming, watching videos, communication, and more!
+    </KeyConcept>
+
     <h3>Activity: Is this a computer?</h3>
     <p>Look at the items below. Which ones are computers?</p>
     <ul>
@@ -51,8 +83,11 @@ const ComputerFoundationsLesson: FC = () => (
         <li>Smart Car? (Yes, cars have many computers!)</li>
         <li>Bicycle? (No)</li>
     </ul>
-    <h3>Input vs. Output</h3>
-    <p><strong>Input devices</strong> are used to put data INTO a computer (Mouse, Keyboard, Microphone). <strong>Output devices</strong> are used to get information OUT of a computer (Monitor, Printer, Speakers).</p>
+    
+    <KeyConcept title="Input vs. Output">
+        <strong>Input devices</strong> are used to put data INTO a computer (Mouse, Keyboard, Microphone). <strong>Output devices</strong> are used to get information OUT of a computer (Monitor, Printer, Speakers).
+    </KeyConcept>
+
     <h3>Play the Computer Parts Game!</h3>
     <div className="iframe-container">
         <iframe
@@ -121,8 +156,9 @@ const KeyboardingLesson: FC = () => {
                 <li>Use Touch Typing and proper posture.</li>
                 <li>Understand home row position and finger placement.</li>
             </ul>
-            <h3>Proper Typing Posture</h3>
-            <p>Sit up straight, keep your feet flat on the floor, and keep your wrists in a neutral stance. This will help you type faster and more comfortably!</p>
+            <KeyConcept title="Proper Typing Posture">
+                Sit up straight, keep your feet flat on the floor, and keep your wrists in a neutral stance. This will help you type faster and more comfortably!
+            </KeyConcept>
             <h3>Activity: Color the Keyboard</h3>
             <p>Use the color palette to color-code the keyboard based on the instructions. This will help you remember which finger should press each key!</p>
             <ul>
@@ -259,8 +295,10 @@ const IntroToProgrammingLesson: FC = () => (
       <li>Give examples of Algorithms.</li>
       <li>Use Scratch to create simple animations.</li>
     </ul>
-    <h3>What is an Algorithm?</h3>
-    <p>An algorithm is a step-by-step procedure for solving a problem. Algorithms are everywhere! A recipe for making food is an algorithm, and the process of folding a shirt is an algorithm. In computing, programmers write algorithms that instruct the computer how to perform a task.</p>
+
+    <KeyConcept title="What is an Algorithm?">
+      An algorithm is a step-by-step procedure for solving a problem. Algorithms are everywhere! A recipe for making food is an algorithm, and the process of folding a shirt is an algorithm. In computing, programmers write algorithms that instruct the computer how to perform a task.
+    </KeyConcept>
     
     <h3>What are Programming Languages?</h3>
     <p>A programming language is a vocabulary and set of grammatical rules for instructing a computer to perform specific tasks. Just like people need a specific language to communicate, so do computers. Examples: Python, Java, JavaScript, C++.</p>
@@ -302,8 +340,9 @@ const XYCoordinateSystemLesson: FC = () => (
             <li>Use coordinates to position sprites on the stage.</li>
             <li>Create an animation using coordinate-based movement.</li>
         </ul>
-        <h3>Treasure Maps and Coordinates</h3>
-        <p>Treasure maps use coordinates to show you exactly where to find the treasure! Scratch uses a similar system. The stage is a grid with an X (right and left) and a Y (up and down) position. The center is (0, 0).</p>
+        <KeyConcept title="Coordinates">
+            Treasure maps use coordinates to show you exactly where to find the treasure! Scratch uses a similar system. The stage is a grid with an X (right and left) and a Y (up and down) position. The center is (0, 0).
+        </KeyConcept>
 
         <h3>Lab: Create an Aquarium</h3>
         <p>Let's use our knowledge of coordinates to create an aquarium scene.</p>
@@ -326,8 +365,9 @@ const CloneAndRandomBlocksLesson: FC = () => (
             <li>Use the 'pick random' block to add unpredictability.</li>
             <li>Improve the code quality of the Scratch aquarium project.</li>
         </ul>
-        <h3>Making Copies with Clones</h3>
-        <p>Instead of adding hundreds of fish sprites, we can use clones! You can program one sprite and then create many copies of it that follow the same or slightly different rules.</p>
+        <KeyConcept title="Clones">
+            Instead of adding hundreds of fish sprites, we can use clones! You can program one sprite and then create many copies of it that follow the same or slightly different rules.
+        </KeyConcept>
         <h3>Adding Randomness</h3>
         <p>The 'pick random' block makes games more fun and unpredictable. You can use it to make sprites appear in random locations, move at random speeds, or change to random colors.</p>
         <h3>Lab: Improve the Aquarium</h3>
@@ -342,11 +382,13 @@ const VariablesAndConditionalsLesson: FC = () => (
             <li>Understand and use variables in Scratch.</li>
             <li>Understand and use conditional statements (if/then).</li>
         </ul>
-        <h3>Variables: Containers for Information</h3>
-        <p>Think of a variable as a box or a container that can hold a value, like a number or a word. In a game, we can use a variable to keep track of the score. The score can change, so it's "variable"!</p>
+        <KeyConcept title="Variables: Containers for Information">
+            Think of a variable as a box or a container that can hold a value, like a number or a word. In a game, we can use a variable to keep track of the score. The score can change, so it's "variable"!
+        </KeyConcept>
         
-        <h3>Conditional Statements: Making Decisions</h3>
-        <p>Conditional statements (like "If... Then...") let our program make decisions. "IF the cat is hungry, THEN feed it." In Scratch, these blocks check if a condition is true, and if it is, they run the code inside.</p>
+        <KeyConcept title="Conditional Statements: Making Decisions">
+            Conditional statements (like "If... Then...") let our program make decisions. "IF the cat is hungry, THEN feed it." In Scratch, these blocks check if a condition is true, and if it is, they run the code inside.
+        </KeyConcept>
 
         <h3>Lab: Color-Changing Chameleon</h3>
         <p>Let's create a chameleon sprite and a circle sprite. We'll write a script that says: IF the chameleon is touching the circle, THEN change its color. This is a simple but powerful use of a conditional statement!</p>
@@ -360,13 +402,9 @@ const ComparisonSymbolsLesson: FC = () => (
             <li>Learn and implement comparison symbols ( &lt;, &gt;, = ).</li>
             <li>Learn to get user input in Scratch.</li>
         </ul>
-        <h3>Comparison Symbols: The Crocodile Method</h3>
-        <p>Comparison symbols help our program compare values. Think of the &lt; and &gt; symbols as a crocodile's mouth—it always wants to eat the bigger number!</p>
-        <ul>
-            <li>10 &gt; 5 (10 is greater than 5)</li>
-            <li>5 &lt; 10 (5 is less than 10)</li>
-            <li>5 = 5 (5 is equal to 5)</li>
-        </ul>
+        <KeyConcept title="Comparison Symbols: The Crocodile Method">
+            Comparison symbols help our program compare values. Think of the &lt; and &gt; symbols as a crocodile's mouth—it always wants to eat the bigger number! 10 &gt; 5 (10 is greater than 5).
+        </KeyConcept>
         
         <h3>Getting User Input</h3>
         <p>The 'ask and wait' block lets your program ask the user a question. The user's answer is stored in a special 'answer' variable that you can use!</p>
@@ -398,8 +436,10 @@ const IntroToComputationalThinkingLesson: FC = () => (
   <div>
     <h3>Class Objectives</h3>
     <p>Introduce computational thinking and its techniques.</p>
-    <h3>What is Computational Thinking?</h3>
-    <p>It's an organized way of approaching and solving a complex problem. The main techniques are:</p>
+    <KeyConcept title="What is Computational Thinking?">
+        It's an organized way of approaching and solving a complex problem.
+    </KeyConcept>
+    <h3>The 4 Techniques</h3>
     <ul>
       <li><strong>Decomposition:</strong> Breaking a large problem into smaller, more manageable parts.</li>
       <li><strong>Pattern Recognition:</strong> Finding similarities or patterns in problems or data.</li>
@@ -415,8 +455,9 @@ const DecompositionLesson: FC = () => (
     <div>
         <h3>Class Objectives</h3>
         <p>Explore the computational thinking concept of decomposition.</p>
-        <h3>Decomposition in Action</h3>
-        <p>Decomposition is about breaking down a big problem into smaller, bite-sized pieces. Think about brushing your teeth:</p>
+        <KeyConcept title="Decomposition in Action">
+          Decomposition is about breaking down a big problem into smaller, bite-sized pieces. Think about brushing your teeth.
+        </KeyConcept>
         <ol>
             <li>Pick up your toothbrush.</li>
             <li>Put toothpaste on it.</li>
@@ -433,8 +474,9 @@ const PatternRecognitionLesson: FC = () => (
     <div>
         <h3>Class Objectives</h3>
         <p>Use Pattern Recognition to create a game.</p>
-        <h3>Finding Patterns</h3>
-        <p>We see patterns everywhere! In the clothes we wear, in nature, and in our daily routines. Recognizing patterns helps us make predictions and solve problems faster.</p>
+        <KeyConcept title="Finding Patterns">
+          We see patterns everywhere! In the clothes we wear, in nature, and in our daily routines. Recognizing patterns helps us make predictions and solve problems faster.
+        </KeyConcept>
         <h3>Lab: Catching Fruit Math Game</h3>
         <p>Let's design a game where you catch fruit to solve math problems. The pattern is: fruit falls, you catch it, you solve a problem, you get a point. We can reuse this pattern for different fruits and different math problems!</p>
     </div>
@@ -444,8 +486,9 @@ const AbstractionLesson: FC = () => (
     <div>
         <h3>Class Objectives</h3>
         <p>Apply Abstraction to solve problems.</p>
-        <h3>What is Abstraction?</h3>
-        <p>Abstraction is focusing on what's important and ignoring the details that don't matter. When you use a microwave, you just need to know which buttons to press, not how the microwaves actually cook the food. That's abstraction!</p>
+        <KeyConcept title="What is Abstraction?">
+            Abstraction is focusing on what's important and ignoring the details that don't matter. When you use a microwave, you just need to know which buttons to press, not how the microwaves actually cook the food. That's abstraction!
+        </KeyConcept>
         <h3>Lab: Catching Fruit Math Game Features</h3>
         <p>To make our game work, what's the most important information we need? We need to know the player's score and the time left. Details like the color of the sky in the background aren't as important for the game to function. We'll abstract away the unnecessary details.</p>
     </div>
@@ -514,8 +557,9 @@ const FlappyBirdOopLesson: FC = () => (
     <div>
         <h3>Class Objectives</h3>
         <p>Understand Object-Oriented Programming (OOP) concepts through the Scratch Environment.</p>
-        <h3>Broadcast Blocks for OOP</h3>
-        <p>A broadcast is a message that is sent through the Scratch program, activating scripts with the matching hat blocks. This helps us organize our code into different objects that can "talk" to each other, which is a key idea in OOP!</p>
+        <KeyConcept title="Broadcast Blocks for OOP">
+            A broadcast is a message that is sent through the Scratch program, activating scripts with the matching hat blocks. This helps us organize our code into different objects that can "talk" to each other, which is a key idea in OOP!
+        </KeyConcept>
         <h3>Lab: Flappy Bird Part 2</h3>
         <p>Let's continue our Flappy Bird game. We'll add a "Game Over" screen, make the game stop if the bird touches the pipes, get the pipes to move across the screen, create a score variable, and even make a scrolling background!</p>
     </div>
@@ -525,8 +569,9 @@ const PacmanProceduresLesson: FC = () => (
     <div>
         <h3>Class Objectives</h3>
         <p>Apply the use of procedures to organize code and make a Pacman game.</p>
-        <h3>Procedures with "My Blocks"</h3>
-        <p>Procedures (also called functions) are like mini-programs within our program. In Scratch, we can create our own procedures using "My Blocks". This helps us avoid repeating code and keeps our project organized.</p>
+        <KeyConcept title="Procedures with 'My Blocks'">
+            Procedures (also called functions) are like mini-programs within our program. In Scratch, we can create our own procedures using "My Blocks". This helps us avoid repeating code and keeps our project organized.
+        </KeyConcept>
         <h3>Lab: Pac-Man Part 1</h3>
         <p>Let's start building Pac-Man! We will create the maze backdrop, draw the Pac-Man, dots, and ghost sprites. We'll also make variables for score and lives, and start programming the player movement.</p>
     </div>
@@ -536,8 +581,9 @@ const PacmanLooksLesson: FC = () => (
     <div>
         <h3>Class Objectives</h3>
         <p>Learn about Looks blocks and version control while continuing the Pacman game.</p>
-        <h3>Version Control</h3>
-        <p>Ever made a mistake and wished you could go back? Version control is like saving checkpoints in a game. In Scratch, we can use "Save as" to create different versions of our project, so we can always go back if something breaks.</p>
+        <KeyConcept title="Version Control">
+            Ever made a mistake and wished you could go back? Version control is like saving checkpoints in a game. In Scratch, we can use "Save as" to create different versions of our project, so we can always go back if something breaks.
+        </KeyConcept>
         <h3>Lab: Pac-Man Part 2</h3>
         <p>Let's add more features! We will make Pac-Man stop at walls, program the ghosts to move on a path, and make the dots disappear and increase the score when Pac-Man eats them.</p>
     </div>
@@ -547,8 +593,9 @@ const PacmanSpeechLesson: FC = () => (
     <div>
         <h3>Class Objectives</h3>
         <p>Utilize the new “Text to Speech” block to create a simple program in Scratch and complete the Pacman game.</p>
-        <h3>Scratch Extensions</h3>
-        <p>Scratch Extensions add more blocks and capabilities! Today we'll add the "Text to Speech" extension to make our sprites talk.</p>
+        <KeyConcept title="Scratch Extensions">
+            Scratch Extensions add more blocks and capabilities! Today we'll add the "Text to Speech" extension to make our sprites talk.
+        </KeyConcept>
         <h3>Lab: Pac-Man Finale!</h3>
         <p>First, we'll practice with the new Text to Speech blocks. Then, we'll finish our Pac-Man game! We'll program what happens when Pac-Man touches a ghost (lose a life), what happens when lives reach 0 (game over), and how to reset the game to play again.</p>
     </div>
@@ -674,6 +721,9 @@ const sprintData: Sprint[] = [
 const App: FC = () => {
     const [selectedSprint, setSelectedSprint] = useState<Sprint | null>(null);
     const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
+    const [completedLessons, setCompletedLessons] = useState<Set<string>>(new Set());
+    const [isCodieOpen, setIsCodieOpen] = useState(false);
+
 
     const handleSelectSprint = (sprint: Sprint) => {
         setSelectedSprint(sprint);
@@ -694,6 +744,10 @@ const App: FC = () => {
     
     const handleNavigateLesson = (direction: 'prev' | 'next') => {
         if (!selectedSprint || !selectedLesson) return;
+        
+        if(direction === 'next'){
+             setCompletedLessons(prev => new Set(prev).add(selectedLesson.id));
+        }
 
         const currentIndex = selectedSprint.lessons.findIndex(l => l.id === selectedLesson.id);
         const newIndex = direction === 'next' ? currentIndex + 1 : currentIndex - 1;
@@ -702,6 +756,17 @@ const App: FC = () => {
             setSelectedLesson(selectedSprint.lessons[newIndex]);
         }
     };
+    
+    const ProgressBar: FC<{sprint: Sprint}> = ({sprint}) => {
+        const completedCount = sprint.lessons.filter(l => completedLessons.has(l.id)).length;
+        const totalCount = sprint.lessons.length;
+        const progress = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
+        return (
+            <div className="progress-bar-container" aria-label={`${completedCount} of ${totalCount} lessons completed`}>
+                <div className="progress-bar" style={{width: `${progress}%`}}></div>
+            </div>
+        )
+    };
 
     const SprintsView = () => (
         <div className="grid-container">
@@ -709,6 +774,7 @@ const App: FC = () => {
                 <div key={sprint.id} className="card" onClick={() => handleSelectSprint(sprint)} role="button" tabIndex={0} onKeyDown={(e) => e.key === 'Enter' && handleSelectSprint(sprint)}>
                     <h2>{sprint.title}</h2>
                     <p>{sprint.description}</p>
+                    <ProgressBar sprint={sprint} />
                 </div>
             ))}
         </div>
@@ -718,7 +784,10 @@ const App: FC = () => {
         <div className="grid-container">
             {sprint.lessons.map(lesson => (
                  <div key={lesson.id} className="card" onClick={() => handleSelectLesson(lesson)} role="button" tabIndex={0} onKeyDown={(e) => e.key === 'Enter' && handleSelectLesson(lesson)}>
-                    <h2>{lesson.title}</h2>
+                    <div className="card-header">
+                        <h2>{lesson.title}</h2>
+                        {completedLessons.has(lesson.id) && <CheckmarkIcon />}
+                    </div>
                 </div>
             ))}
         </div>
@@ -745,6 +814,74 @@ const App: FC = () => {
         );
     }
     
+    const AskCodie: FC<{ lesson: Lesson | null }> = ({ lesson }) => {
+        const [userInput, setUserInput] = useState('');
+        const [messages, setMessages] = useState<{ author: 'user' | 'bot'; text: string }[]>([]);
+        const [isLoading, setIsLoading] = useState(false);
+        const chatEndRef = useRef<HTMLDivElement>(null);
+
+        useEffect(() => {
+            chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        }, [messages]);
+
+        const handleSubmit = async (e: React.FormEvent) => {
+            e.preventDefault();
+            if (!userInput.trim() || isLoading) return;
+
+            const userMessage = { author: 'user' as const, text: userInput };
+            setMessages(prev => [...prev, userMessage]);
+            setUserInput('');
+            setIsLoading(true);
+
+            try {
+                const response = await ai.models.generateContent({
+                    model: 'gemini-2.5-flash',
+                    contents: `Based on the lesson "${lesson?.title}", please answer this student's question: "${userInput}"`,
+                    config: {
+                        systemInstruction: "You are Codie, a friendly and encouraging robot helper for young students (ages 5-8) learning about computers. Your goal is to help them understand the lesson content. Explain concepts in very simple, easy-to-understand terms. Use short sentences and analogies related to things kids know (like toys, games, or animals). Keep your answers short, positive, and focused. If a student asks a question unrelated to the lesson title provided, politely say 'That's a great question, but let's stay focused on our current mission!' or something similar. Do not answer questions about complex topics, inappropriate subjects, or anything outside the scope of the lesson.",
+                    }
+                });
+                const botMessage = { author: 'bot' as const, text: response.text };
+                setMessages(prev => [...prev, botMessage]);
+            } catch (error) {
+                console.error("Error calling Gemini API:", error);
+                const errorMessage = { author: 'bot' as const, text: "Oops! I'm having a little trouble connecting right now. Please try again in a moment." };
+                setMessages(prev => [...prev, errorMessage]);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        return (
+            <div className="chat-modal">
+                <div className="chat-header">
+                    <h3>Ask Codie a Question!</h3>
+                    <button onClick={() => setIsCodieOpen(false)} aria-label="Close chat">&times;</button>
+                </div>
+                <div className="chat-window">
+                    {messages.map((msg, index) => (
+                        <div key={index} className={`chat-message ${msg.author}`}>
+                            <p>{msg.text}</p>
+                        </div>
+                    ))}
+                     {isLoading && <div className="chat-message bot loading"><span></span><span></span><span></span></div>}
+                    <div ref={chatEndRef} />
+                </div>
+                <form onSubmit={handleSubmit} className="chat-input-form">
+                    <input
+                        type="text"
+                        value={userInput}
+                        onChange={(e) => setUserInput(e.target.value)}
+                        placeholder="Type your question here..."
+                        aria-label="Your question for Codie"
+                        disabled={isLoading}
+                    />
+                    <button type="submit" disabled={isLoading}>Send</button>
+                </form>
+            </div>
+        );
+    };
+
     const getBreadcrumb = () => {
         if (selectedLesson) return `${selectedSprint?.title} > ${selectedLesson.title}`;
         if (selectedSprint) return selectedSprint.title;
@@ -769,6 +906,12 @@ const App: FC = () => {
                 {selectedSprint && !selectedLesson && <LessonsView sprint={selectedSprint} />}
                 {selectedSprint && selectedLesson && <LessonView sprint={selectedSprint} lesson={selectedLesson} />}
             </main>
+             {selectedLesson && (
+                <button onClick={() => setIsCodieOpen(true)} className="codie-button" aria-label="Open Codie AI helper">
+                    <RobotIcon />
+                </button>
+            )}
+            {isCodieOpen && <AskCodie lesson={selectedLesson} />}
         </>
     );
 };
